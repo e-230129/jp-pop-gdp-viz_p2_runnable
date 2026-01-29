@@ -1,0 +1,678 @@
+# GDP・REER データ定義（シナリオ対応）
+# 単位: GDP=兆円, REER=指数
+
+metadata:
+  last_updated: "2026-01-29"
+  retrieved_at: "2026-01-29"
+  gdp:
+    source: "内閣府 国民経済計算（GDP統計）"
+    source_url: "https://www.esri.cao.go.jp/jp/sna/menu.html"
+    unit: "兆円"
+    type: "名目GDP"
+    calendar: "暦年"
+    actual_end_year: 2024
+  reer:
+    source: "BIS 実質実効為替レート"
+    source_url: "https://data.bis.org/topics/EER"
+    unit: "指数"
+    basket: "Broad"
+    base_year: 2020
+    actual_end_year: 2024
+  projection:
+    gdp_method: "仮定値（シナリオ別）"
+    gdp_assumption: "成長率ベース（低1.5%/ベース2.5%/高3.5%）。旧+20兆円/5年は非推奨。"
+    reer_method: "仮定値（シナリオ別）"
+    reer_assumption: "横ばい/平均回帰/トレンド継続の3シナリオ"
+
+structural_model_params:
+  base_year: 2024
+  base_gdp: 610.0  # 兆円
+
+  productivity_scenarios:
+    low: 0.5    # %/年
+    mid: 1.0
+    high: 1.5
+
+  inflation_scenarios:
+    deflation: -0.5
+    stable: 1.0
+    target: 2.0
+
+  custom_scenarios:
+    cabinet_growth_consistent:
+      name: "内閣府整合"
+      productivity: 1.2
+      inflation: 1.5
+      description: "内閣府成長実現ケースと整合する生産性・インフレ仮定"
+
+scenarios:
+  # === GDPシナリオ（成長率ベース） ===
+  gdp_baseline:
+    name: "ベースライン（名目2.5%成長）"
+    type: "growth_rate"
+    growth_rate: 2.5
+    components:
+      real_growth: 0.5
+      inflation: 2.0
+    source: "仮定値（実質0.5% + インフレ2%）"
+    description: "現状維持シナリオ：潜在成長率並み"
+
+  gdp_low_growth:
+    name: "低成長（名目1.5%）"
+    type: "growth_rate"
+    growth_rate: 1.5
+    components:
+      real_growth: 0.0
+      inflation: 1.5
+    source: "仮定値"
+    description: "デフレ継続：実質ゼロ成長 + 低インフレ"
+
+  gdp_high_growth:
+    name: "高成長（名目3.5%）"
+    type: "growth_rate"
+    growth_rate: 3.5
+    components:
+      real_growth: 1.5
+      inflation: 2.0
+    source: "仮定値（内閣府成長実現ケース相当）"
+    description: "成長実現：生産性向上 + 物価目標達成"
+
+  gdp_baseline_legacy:
+    name: "旧ベースライン（+20兆/5年）"
+    type: "linear"
+    annual_increase: 4.0  # 兆円/年
+    source: "旧方式（非推奨）"
+    description: "年0.6%相当、長期で低成長すぎる"
+    deprecated: true
+
+  # === GDPシナリオ（内閣府） ===
+  gdp_cabinet_growth:
+    name: "内閣府・成長実現ケース"
+    source: "内閣府 中長期の経済財政に関する試算（2025年1月）"
+    source_url: "https://www5.cao.go.jp/keizai3/projection-e.html"
+    description: "実質2%程度、名目3%程度の成長"
+
+  gdp_cabinet_baseline:
+    name: "内閣府・ベースラインケース"
+    source: "内閣府 中長期の経済財政に関する試算（2025年1月）"
+    description: "過去トレンド並みの潜在成長率"
+
+  gdp_cabinet_growth_2025:
+    name: "内閣府・成長実現（2025年1月試算）"
+    source: "内閣府 中長期の経済財政に関する試算"
+    source_url: "https://www5.cao.go.jp/keizai3/econome/r7-1-18econome.pdf"
+    retrieved_at: "2026-01-29"
+    description: "Higher Economic Growth Case（名目GDP、FY）"
+    notes: "公表値はFY2023-2034。2034以降は年率3%で延長。"
+
+  gdp_cabinet_baseline_2025:
+    name: "内閣府・ベースライン（2025年1月試算）"
+    source: "内閣府 中長期の経済財政に関する試算"
+    source_url: "https://www5.cao.go.jp/keizai3/econome/r7-1-18econome.pdf"
+    retrieved_at: "2026-01-29"
+    description: "Projection of Past Trend Case（名目GDP、FY）"
+    notes: "公表値はFY2023-2034。2034以降はFY2029-2034のCAGR(約1.38%)で延長。"
+
+  # === GDPシナリオ（構造モデル） ===
+  # 命名規則: structural_{productivity}_{inflation}
+  # productivity: low(0.5%), mid(1.0%), high(1.5%)
+  # inflation: deflation(-0.5%), stable(1.0%), target(2.0%)
+
+  structural_mid_stable:
+    name: "構造モデル（中位）"
+    type: "structural"
+    description: "生産年齢人口×生産性(1.0%/年)×物価(1.0%/年)"
+    productivity_growth: 1.0
+    inflation: 1.0
+
+  structural_low_deflation:
+    name: "構造モデル（悲観）"
+    type: "structural"
+    description: "生産年齢人口×生産性(0.5%/年)×物価(-0.5%/年)"
+    productivity_growth: 0.5
+    inflation: -0.5
+
+  structural_high_target:
+    name: "構造モデル（楽観）"
+    type: "structural"
+    description: "生産年齢人口×生産性(1.5%/年)×物価(2.0%/年)"
+    productivity_growth: 1.5
+    inflation: 2.0
+
+  # === REERシナリオ ===
+  reer_flat:
+    name: "横ばい（2024値で固定）"
+    type: "flat"
+    description: "最終実績値(68)で固定"
+
+  reer_mean_revert:
+    name: "平均回帰（過去20年平均へ）"
+    type: "mean_revert"
+    target: 85
+    half_life: 15
+    description: "過去20年平均(約85)に15年かけて半分戻る"
+
+  reer_trend:
+    name: "トレンド継続（-1.5/年）"
+    type: "trend"
+    annual_change: -1.5
+    description: "直近10年の傾き(約-1.5/年)を継続"
+
+# 実績データ（全シナリオ共通）
+actual_data:
+  - year: 1950
+    gdp: 4.0
+    reer: null
+  - year: 1955
+    gdp: 8.4
+    reer: null
+  - year: 1960
+    gdp: 16.0
+    reer: null
+  - year: 1964
+    gdp: 29.5
+    reer: 55
+  - year: 1965
+    gdp: 32.9
+    reer: 57
+  - year: 1970
+    gdp: 73.3
+    reer: 68
+  - year: 1971
+    gdp: 80.7
+    reer: 72
+  - year: 1973
+    gdp: 112.5
+    reer: 85
+  - year: 1975
+    gdp: 148.3
+    reer: 82
+  - year: 1980
+    gdp: 240.2
+    reer: 90
+  - year: 1985
+    gdp: 324.5
+    reer: 98
+  - year: 1988
+    gdp: 387.0
+    reer: 125
+  - year: 1990
+    gdp: 442.8
+    reer: 110
+  - year: 1991
+    gdp: 469.4
+    reer: 115
+  - year: 1993
+    gdp: 476.1
+    reer: 135
+  - year: 1995
+    gdp: 501.7
+    reer: 150
+  - year: 1998
+    gdp: 500.2
+    reer: 125
+  - year: 2000
+    gdp: 509.9
+    reer: 135
+  - year: 2005
+    gdp: 505.3
+    reer: 110
+  - year: 2007
+    gdp: 518.3
+    reer: 105
+  - year: 2008
+    gdp: 505.1
+    reer: 100
+  - year: 2010
+    gdp: 500.4
+    reer: 110
+  - year: 2011
+    gdp: 491.4
+    reer: 115
+  - year: 2012
+    gdp: 495.0
+    reer: 110
+  - year: 2013
+    gdp: 507.5
+    reer: 100
+  - year: 2015
+    gdp: 532.2
+    reer: 85
+  - year: 2018
+    gdp: 556.2
+    reer: 78
+  - year: 2020
+    gdp: 539.0
+    reer: 100
+  - year: 2021
+    gdp: 541.5
+    reer: 90
+  - year: 2022
+    gdp: 560.7
+    reer: 75
+  - year: 2023
+    gdp: 590.0
+    reer: 70
+  - year: 2024
+    gdp: 610.0
+    reer: 68
+
+# 推計データ（シナリオ別）
+projection_data:
+  gdp_baseline_legacy:
+    - year: 2025
+      gdp: 620
+    - year: 2030
+      gdp: 640
+    - year: 2035
+      gdp: 660
+    - year: 2040
+      gdp: 680
+    - year: 2045
+      gdp: 700
+    - year: 2050
+      gdp: 720
+    - year: 2055
+      gdp: 740
+    - year: 2060
+      gdp: 760
+    - year: 2065
+      gdp: 780
+    - year: 2070
+      gdp: 800
+    - year: 2075
+      gdp: 820
+    - year: 2080
+      gdp: 840
+    - year: 2085
+      gdp: 860
+    - year: 2090
+      gdp: 880
+    - year: 2095
+      gdp: 900
+    - year: 2100
+      gdp: 920
+
+  gdp_baseline:
+    - year: 2025
+      gdp: 625
+    - year: 2030
+      gdp: 707
+    - year: 2035
+      gdp: 800
+    - year: 2040
+      gdp: 906
+    - year: 2045
+      gdp: 1025
+    - year: 2050
+      gdp: 1159
+    - year: 2055
+      gdp: 1312
+    - year: 2060
+      gdp: 1484
+    - year: 2065
+      gdp: 1679
+    - year: 2070
+      gdp: 1899
+    - year: 2075
+      gdp: 2149
+    - year: 2080
+      gdp: 2431
+    - year: 2085
+      gdp: 2751
+    - year: 2090
+      gdp: 3112
+    - year: 2095
+      gdp: 3521
+    - year: 2100
+      gdp: 3984
+
+  gdp_low_growth:
+    - year: 2025
+      gdp: 619
+    - year: 2030
+      gdp: 667
+    - year: 2035
+      gdp: 719
+    - year: 2040
+      gdp: 774
+    - year: 2045
+      gdp: 834
+    - year: 2050
+      gdp: 898
+    - year: 2055
+      gdp: 968
+    - year: 2060
+      gdp: 1043
+    - year: 2065
+      gdp: 1123
+    - year: 2070
+      gdp: 1210
+    - year: 2075
+      gdp: 1303
+    - year: 2080
+      gdp: 1404
+    - year: 2085
+      gdp: 1513
+    - year: 2090
+      gdp: 1630
+    - year: 2095
+      gdp: 1756
+    - year: 2100
+      gdp: 1891
+
+  gdp_high_growth:
+    - year: 2025
+      gdp: 631
+    - year: 2030
+      gdp: 750
+    - year: 2035
+      gdp: 891
+    - year: 2040
+      gdp: 1058
+    - year: 2045
+      gdp: 1256
+    - year: 2050
+      gdp: 1492
+    - year: 2055
+      gdp: 1772
+    - year: 2060
+      gdp: 2105
+    - year: 2065
+      gdp: 2500
+    - year: 2070
+      gdp: 2969
+    - year: 2075
+      gdp: 3526
+    - year: 2080
+      gdp: 4188
+    - year: 2085
+      gdp: 4974
+    - year: 2090
+      gdp: 5907
+    - year: 2095
+      gdp: 7016
+    - year: 2100
+      gdp: 8333
+
+  gdp_cabinet_baseline:
+    - year: 2025
+      gdp: 630
+    - year: 2030
+      gdp: 650
+    - year: 2035
+      gdp: 670
+    - year: 2040
+      gdp: 690
+    - year: 2045
+      gdp: 710
+    - year: 2050
+      gdp: 730
+    - year: 2055
+      gdp: 750
+    - year: 2060
+      gdp: 770
+    - year: 2065
+      gdp: 790
+    - year: 2070
+      gdp: 810
+    - year: 2075
+      gdp: 830
+    - year: 2080
+      gdp: 850
+    - year: 2085
+      gdp: 870
+    - year: 2090
+      gdp: 890
+    - year: 2095
+      gdp: 910
+    - year: 2100
+      gdp: 930
+
+  gdp_cabinet_growth:
+    - year: 2025
+      gdp: 650
+    - year: 2030
+      gdp: 670
+    - year: 2035
+      gdp: 690
+    - year: 2040
+      gdp: 710
+    - year: 2045
+      gdp: 730
+    - year: 2050
+      gdp: 750
+    - year: 2055
+      gdp: 770
+    - year: 2060
+      gdp: 790
+    - year: 2065
+      gdp: 810
+    - year: 2070
+      gdp: 830
+    - year: 2075
+      gdp: 850
+    - year: 2080
+      gdp: 870
+    - year: 2085
+      gdp: 890
+    - year: 2090
+      gdp: 910
+    - year: 2095
+      gdp: 930
+    - year: 2100
+      gdp: 950
+
+  gdp_cabinet_growth_2025:
+    name: "内閣府・成長実現（2025年1月試算）"
+    source: "内閣府 中長期の経済財政に関する試算"
+    source_url: "https://www5.cao.go.jp/keizai3/econome/r7-1-18econome.pdf"
+    retrieved_at: "2026-01-29"
+    description: "Higher Economic Growth Case（名目GDP、FY）"
+    data:
+      - year: 2025
+        gdp: 637.4
+      - year: 2026
+        gdp: 653.1
+      - year: 2027
+        gdp: 669.2
+      - year: 2028
+        gdp: 686.1
+      - year: 2029
+        gdp: 704.1
+      - year: 2030
+        gdp: 723.2
+      - year: 2031
+        gdp: 743.5
+      - year: 2032
+        gdp: 764.7
+      - year: 2033
+        gdp: 787.0
+      - year: 2034
+        gdp: 809.7
+      - year: 2035
+        gdp: 834.0
+      - year: 2040
+        gdp: 966.8
+      - year: 2045
+        gdp: 1120.8
+      - year: 2050
+        gdp: 1299.3
+      - year: 2055
+        gdp: 1506.3
+      - year: 2060
+        gdp: 1746.2
+      - year: 2065
+        gdp: 2024.3
+      - year: 2070
+        gdp: 2346.7
+      - year: 2075
+        gdp: 2720.5
+      - year: 2080
+        gdp: 3153.8
+      - year: 2085
+        gdp: 3656.1
+      - year: 2090
+        gdp: 4238.5
+      - year: 2095
+        gdp: 4913.5
+      - year: 2100
+        gdp: 5696.1
+
+  gdp_cabinet_baseline_2025:
+    name: "内閣府・ベースライン（2025年1月試算）"
+    source: "内閣府 中長期の経済財政に関する試算"
+    source_url: "https://www5.cao.go.jp/keizai3/econome/r7-1-18econome.pdf"
+    retrieved_at: "2026-01-29"
+    description: "Projection of Past Trend Case（名目GDP、FY）"
+    data:
+      - year: 2025
+        gdp: 633.2
+      - year: 2026
+        gdp: 641.8
+      - year: 2027
+        gdp: 651.0
+      - year: 2028
+        gdp: 660.9
+      - year: 2029
+        gdp: 670.8
+      - year: 2030
+        gdp: 680.7
+      - year: 2031
+        gdp: 690.1
+      - year: 2032
+        gdp: 699.8
+      - year: 2033
+        gdp: 709.1
+      - year: 2034
+        gdp: 718.4
+      - year: 2035
+        gdp: 728.3
+      - year: 2040
+        gdp: 780.0
+      - year: 2045
+        gdp: 835.3
+      - year: 2050
+        gdp: 894.6
+      - year: 2055
+        gdp: 958.1
+      - year: 2060
+        gdp: 1026.1
+      - year: 2065
+        gdp: 1098.9
+      - year: 2070
+        gdp: 1176.9
+      - year: 2075
+        gdp: 1260.4
+      - year: 2080
+        gdp: 1349.8
+      - year: 2085
+        gdp: 1445.6
+      - year: 2090
+        gdp: 1548.2
+      - year: 2095
+        gdp: 1658.1
+      - year: 2100
+        gdp: 1775.7
+
+  reer_flat:
+    - year: 2025
+      reer: 68
+    - year: 2030
+      reer: 68
+    - year: 2035
+      reer: 68
+    - year: 2040
+      reer: 68
+    - year: 2045
+      reer: 68
+    - year: 2050
+      reer: 68
+    - year: 2055
+      reer: 68
+    - year: 2060
+      reer: 68
+    - year: 2065
+      reer: 68
+    - year: 2070
+      reer: 68
+    - year: 2075
+      reer: 68
+    - year: 2080
+      reer: 68
+    - year: 2085
+      reer: 68
+    - year: 2090
+      reer: 68
+    - year: 2095
+      reer: 68
+    - year: 2100
+      reer: 68
+
+  reer_mean_revert:
+    - year: 2025
+      reer: 68
+    - year: 2030
+      reer: 72
+    - year: 2035
+      reer: 76
+    - year: 2040
+      reer: 80
+    - year: 2045
+      reer: 82
+    - year: 2050
+      reer: 84
+    - year: 2055
+      reer: 85
+    - year: 2060
+      reer: 85
+    - year: 2065
+      reer: 85
+    - year: 2070
+      reer: 85
+    - year: 2075
+      reer: 85
+    - year: 2080
+      reer: 85
+    - year: 2085
+      reer: 85
+    - year: 2090
+      reer: 85
+    - year: 2095
+      reer: 85
+    - year: 2100
+      reer: 85
+
+  reer_trend:
+    - year: 2025
+      reer: 65
+    - year: 2030
+      reer: 62
+    - year: 2035
+      reer: 60
+    - year: 2040
+      reer: 58
+    - year: 2045
+      reer: 55
+    - year: 2050
+      reer: 53
+    - year: 2055
+      reer: 50
+    - year: 2060
+      reer: 48
+    - year: 2065
+      reer: 45
+    - year: 2070
+      reer: 43
+    - year: 2075
+      reer: 40
+    - year: 2080
+      reer: 38
+    - year: 2085
+      reer: 36
+    - year: 2090
+      reer: 34
+    - year: 2095
+      reer: 32
+    - year: 2100
+      reer: 30

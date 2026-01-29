@@ -1,0 +1,15 @@
+.claude/
+
+# Python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local outputs / exports
+out/
+upload/
+fix_files_*/
+*.zip
+
+# OS cruft
+Thumbs.db

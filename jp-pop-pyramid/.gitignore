@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+out/*.png
+out/*.pdf
+out/*.gif
+out/*.mp4
+out/*.html
+!out/.gitkeep
+
+# Large data files (keep CSVs for now)
+*.xlsx
+*.xls
+
+# Allow source spreadsheets kept under data/raw
+!data/raw/*.xlsx
